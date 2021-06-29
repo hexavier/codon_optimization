@@ -97,9 +97,11 @@ updataset["r_bins"] = cut(updataset$bias,breaks=9); downdataset["r_bins"] = cut(
 alldataset = rbind(updataset,downdataset)
 
 # Plot
-ggplot(alldataset[!is.na(dataset$r_bins),], aes(x=r_bins, y=counts, fill=updown)) +
+ggplot(alldataset[!is.na(alldataset$r_bins),], aes(x=r_bins, y=counts, fill=updown)) +
   geom_boxplot(position=position_dodge(1)) + 
+  scale_fill_manual(values=c("blue","red")) +
   scale_y_continuous(trans='log10') +
-  theme_classic()
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 20, vjust = 1, hjust=1))
 cor(abs(updataset$bias),updataset$counts,method="spearman", use="pairwise")
 cor(abs(downdataset$bias),downdataset$counts,method="spearman", use="pairwise")
