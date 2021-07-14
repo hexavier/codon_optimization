@@ -47,7 +47,7 @@ GENETIC_CODE = {
 DINUCL = ["AA","TT","GG","CC","AT","AG","AC","TA","TC","TG","GA","GC","GT","CA","CT","CG"]
 
 #%% Load data
-# Fasta sequences parsing
+# Fasta sequences parsing: ftp://ftp.ncbi.nlm.nih.gov/pub/CCDS/current_human/CCDS_nucleotide.current.fna.gz
 ccds_seq = openfasta("data/CCDS_nucleotide.current.fna")
 # CCDSs
 ccds = pd.read_csv("ftp://ftp.ncbi.nlm.nih.gov/pub/CCDS/current_human/CCDS.current.txt", sep="\t", index_col=4)

@@ -1,5 +1,5 @@
 ## Load data
-cocoputs = read.csv("data/o586358-Human_CDS_Bicod_25012021.tsv",sep="\t")
+cocoputs = read.csv("data/o586358-Human_CDS_Bicod_25012021.tsv",sep="\t") # from https://hive.biochemistry.gwu.edu/review/codon2
 mapping = read.csv("data/MANE.GRCh38.v0.91.summary.txt",sep="\t")
 
 ## Map RefSeq IDs to ENSembl
