@@ -1,6 +1,7 @@
 library(ggplot2)
 library(ggpubr)
 library(gplots)
+library(ggrepel)
 
 # Load data
 codus_UPDOWN = read.csv("results/mean_all_randomforest_codusnorm_to_UPDOWNproteins.csv", row.names = 1)[,3:62]
@@ -66,3 +67,25 @@ barplot(aucs,ylim=c(0,1)); abline(h=0.5)
 tissueorder = rownames(codusnormratios)[outratios$colInd]
 aucs = read.csv("results/mean_all_randomforest_codusnorm_to_UPDOWNproteins.csv", row.names = 1)[tissueorder,1]
 barplot(aucs,ylim=c(0,1)); abline(h=0.5)
+
+#### CHECK ASSOCIATION WITH Ki67 ####
+# Get clusters
+hc <- hclust(dist(codusnormratios))
+clusters = cutree(hc, k=2)
+at = rownames(codusnormratios)[clusters==1]
+gc = rownames(codusnormratios)[clusters==2]
+# Load expression data
+protgtex = read.csv("data/proteome_medians_GTEx_Jiang2020.csv",row.names = 1)
+# Build dataset
+expdata = as.data.frame(t(protgtex["ENSG00000148773",,drop=F]))
+expdata$cluster = sapply(rownames(expdata), function(x) if(x %in% at){"AT Cluster"}else{"GC Cluster"})
+expdata$tissue = rownames(expdata)
+ggplot(expdata, aes(x=cluster, y=ENSG00000148773, color=cluster, label=tissue)) +
+  geom_point(position=position_jitter(w = 0.1, h = 0)) +
+  labs(y = "Ki67 Protein Abundance") +
+  scale_color_manual(values=c("red", "blue")) +
+  stat_compare_means(method = "t.test") +
+  geom_text_repel(size=3) +
+  theme_classic()
+ggsave("plots/association_ki67.pdf",width = 4, height = 4)
+

@@ -84,4 +84,63 @@ for (t in matched){
   overlap_df[t,"total"] = length(unique(tissue_exp$gene))
   overlap_df[t,"binomial_test"] = binom.test(overlap_df[t,"agreed"],overlap_df[t,"agreed"]+overlap_df[t,"nonagreed"],alternative="greater")$p.value
 }
-write.csv(overlap_df,"results/overlap_datasets_TSproteins.csv")
+write.csv(overlap_df,sprintf("results/overlap_datasets_TSproteins-FCavg%s-FCglob%s.csv",nfold_avg,nfold_glob))
+
+### Plot NaNs ###
+matched = colnames(eraslan)[colnames(eraslan) %in% colnames(gtex)]
+plotdf = c()
+nandf = c()
+for (t in matched){
+  tissue_exp = TSevents[TSevents$Tissue==t,]
+  tissue_gtex_up = tissue_exp[(tissue_exp$dataset=="gtex")&(tissue_exp$updown=="UP"),"gene"]
+  tissue_eraslan_up = tissue_exp[(tissue_exp$dataset=="eraslan")&(tissue_exp$updown=="UP"),"gene"]
+  tissue_gtex_down = tissue_exp[(tissue_exp$dataset=="gtex")&(tissue_exp$updown=="DOWN"),"gene"]
+  tissue_eraslan_down = tissue_exp[(tissue_exp$dataset=="eraslan")&(tissue_exp$updown=="DOWN"),"gene"]
+  # Overlaps
+  nonagreed=c(tissue_gtex_down[tissue_gtex_down %in% tissue_eraslan_up],tissue_gtex_up[tissue_gtex_up %in% tissue_eraslan_down])
+  agreed=c(tissue_gtex_up[tissue_gtex_up %in% tissue_eraslan_up],tissue_gtex_down[tissue_gtex_down %in% tissue_eraslan_down])
+  # Build dataset
+  tempnan = data.frame(row.names = c(sprintf("T-%s",agreed),sprintf("F-%s",nonagreed)))
+  for (g in agreed){
+    tempdf=data.frame(row.names=1:length(matched))
+    tempdf$tissue = matched
+    tempdf$TS = t
+    tempdf$class = "agreed"
+    tempdf$gene= g
+    tempdf$gtex = as.numeric(gtex[g,matched])
+    tempdf$eraslan = as.numeric(eraslan[g,matched])
+    plotdf = rbind(plotdf,tempdf)
+    tempnan[sprintf("T-%s",g),c("count","gene","class")] = c(sum(rowSums(!is.na(tempdf[,c("gtex","eraslan")]))==2),g,"agreed")
+  }
+  for (g in nonagreed){
+    tempdf=data.frame(row.names=1:length(matched))
+    tempdf$tissue = matched
+    tempdf$TS = t
+    tempdf$class = "nonagreed"
+    tempdf$gene= g
+    tempdf$gtex = as.numeric(gtex[g,matched])
+    tempdf$eraslan = as.numeric(eraslan[g,matched])
+    plotdf = rbind(plotdf,tempdf)
+    tempnan[sprintf("F-%s",g),c("count","gene","class")] = c(sum(rowSums(!is.na(tempdf[,c("gtex","eraslan")]))==2),g,"nonagreed")
+  }
+  tempnan$count = as.numeric(tempnan$count)
+  tempnan$tissue = t
+  nandf = rbind(nandf, tempnan)
+}
+
+# Plot
+library(ggplot2)
+library(ggpubr)
+#ggplot(plotdf[plotdf$TS=="Lung",], aes(x=gtex,y=eraslan,color=class, label=tissue))+
+#  facet_wrap(. ~ gene, ncol = 5, scales = "free") +
+#  geom_point() +
+#  geom_text(size=3,data=subset(plotdf[plotdf$TS=="Lung",], tissue %in% c("Lung"))) +
+#  theme_classic()
+compare_means(count ~ class, data=nandf, p.adjust.method = "fdr",group.by = c("tissue"), alternative="less")
+ggplot(nandf,aes(x=tissue,y=count, fill=class)) +
+  geom_boxplot(position=position_dodge(1)) +
+  labs(x="Tissue", y = "# Non-NA tissues") +
+  scale_fill_manual(values=c("blue", "red")) +
+  stat_summary(position=position_dodge(1),fun.y=median, geom="point", shape=23, size=2) +
+  theme_classic() + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
