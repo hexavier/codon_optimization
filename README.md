@@ -5,3 +5,9 @@ This repository includes the code upon submission used to reproduce the results 
 - Human coding sequences from CCDS: ftp://ftp.ncbi.nlm.nih.gov/pub/CCDS/current_human/CCDS_nucleotide.current.fna.gz
 
 For questions and help, please contact: xavier.hernandez@crg.eu
+
+## License
+
+CUSTOM is under a common MIT LICENSE. Plese, check [LICENSE](./LICENSE) for further information.
+
+###### [2023] - Centre de Regulació Genòmica (CRG) - All Rights Reserved*
