@@ -8,6 +8,6 @@ For questions and help, please contact: xavier.hernandez@crg.eu
 
 ## License
 
-CUSTOM is under a common MIT LICENSE. Plese, check [LICENSE](./LICENSE) for further information.
+This code is under a common MIT LICENSE. Plese, check [LICENSE](./LICENSE) for further information.
 
 ###### [2023] - Centre de Regulació Genòmica (CRG) - All Rights Reserved*
